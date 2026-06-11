@@ -1,16 +1,34 @@
 "use client";
 
 import { PieChart as RechartsPieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { getAllocationByClass } from "@/lib/mockData";
+import { getAllocationBySector } from "@/lib/mockData";
+import { formatCurrency } from "@/lib/utils";
 
 export default function DonutChart() {
-  const allocationData = getAllocationByClass();
+  const allocationData = getAllocationBySector();
+  const totalValue = allocationData.reduce((sum, item) => sum + item.value, 0);
 
-  const COLORS = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6"];
+  const COLORS = {
+    Energy: "#EF4444", // red
+    Technology: "#3B82F6", // blue
+    'Financial Services': "#10B981", // emerald
+    'Metals & Mining': "#F59E0B", // amber
+    Automotive: "#8B5CF6", // violet
+    Pharmaceuticals: "#EC4899", // pink
+    Construction: "#06B6D4", // cyan
+    'Paints': "#84CC16", // lime
+    'FMCG': "#6366F1" // indigo
+  };
 
   return (
-    <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-6">
-      <h3 className="text-sm font-medium text-gray-400 mb-4">Asset Allocation</h3>
+    <div className="bg-white/5 backdrop-blur-lg border border-border rounded-xl p-6 hover:shadow-[0_0_30px_rgba(99,102,241,0.1)]">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-sm font-medium text-white/70">Asset Allocation</h3>
+        <div className="text-center">
+          <p className="text-2xl font-bold text-white tracking-tight">{formatCurrency(totalValue)}</p>
+          <p className="text-xs text-white/50">Total Value</p>
+        </div>
+      </div>
 
       <ResponsiveContainer width="100%" height={260}>
         <RechartsPieChart>
@@ -22,27 +40,47 @@ export default function DonutChart() {
             cy="50%"
             innerRadius={60}
             outerRadius={100}
-            labelLine={{ show: false }}
-            label={{ show: false }}
+            // labelLine={{ show: false }}
+            // label={{ show: false }}
+            animationBegin={500}
+            animationDuration={1000}
+            animationEasing="ease-out"
           >
             {allocationData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[entry.name as keyof typeof COLORS] || "#6B7280"}
+              />
             ))}
           </Pie>
           <Tooltip
-            formatter={(value) => `${value}%`}
-            contentStyle={{ backgroundColor: "#111827", borderColor: "#1F2937" }}
+            contentStyle={{
+              backgroundColor: "rgba(13, 17, 23, 0.9)",
+              borderColor: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(10px)",
+              padding: "8px 12px",
+              borderRadius: "6px"
+            }}
             labelStyle={{ color: "#F9FAFB" }}
             separator={": "}
+            formatter={(value) => `${value}%`}
           />
           <Legend
             verticalAlign="bottom"
-            height={36}
-            wrapperStyle={{ justifySelf: "center" }}
-            itemStyle={{ fontSize: 12, fill: "#9CA3AF" }}
+            height={40}
+            wrapperStyle={{
+              justifySelf: "center"
+            }}
           />
         </RechartsPieChart>
       </ResponsiveContainer>
+
+      {/* Rebalance Suggestion */}
+      <div className="mt-4 text-sm text-white/50 text-center">
+        <p>
+          <span className="font-medium">Rebalance Suggestion:</span> Ideal allocation: 60% Stocks, 20% MF, 20% Crypto
+        </p>
+      </div>
     </div>
   );
 }

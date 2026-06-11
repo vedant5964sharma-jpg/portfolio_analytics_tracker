@@ -6,22 +6,33 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Format a number as currency */
+/** Format a number as currency with INR support */
 export function formatCurrency(
   value: number,
-  currency: string = "USD",
+  currency: string = "INR",
   compact: boolean = false
 ): string {
-  if (compact && Math.abs(value) >= 1_000) {
-    const formatter = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-      notation: "compact",
-      maximumFractionDigits: 1,
-    });
-    return formatter.format(value);
+  if (compact && Math.abs(value) >= 1_00_000) {
+    // Indian compact notation: lakhs and crores
+    if (Math.abs(value) >= 1_00_00_000) {
+      const formatter = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency,
+        notation: "compact",
+        maximumFractionDigits: 1,
+      });
+      return formatter.format(value);
+    } else {
+      const formatter = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency,
+        notation: "compact",
+        maximumFractionDigits: 1,
+      });
+      return formatter.format(value / 100).replace("L", "").replace("₹", "₹") + "L";
+    }
   }
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
     minimumFractionDigits: 2,
